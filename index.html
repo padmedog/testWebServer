@@ -172,8 +172,8 @@ window.addEventListener("load",begin);
 					camera.position.y,
 					camera.position.z
 				);
-				controls.noPan = true;
-				controls.noZoom = true;
+				controls.enablePan = false;
+				controls.enableZoom = false;
 				
 				var setOrientationControls = function(e){
 					if(!e.alpha)
