@@ -236,7 +236,7 @@ window.addEventListener("load",begin);
 				floor.rotation.x = -Math.PI / 2;
 				scene.add(floor);
 				
-				var particleTexture = THREE.ImageUtils.loadTexture("textures/particle.png"),
+				/*var particleTexture = THREE.ImageUtils.loadTexture("textures/particle.png"),
 					spriteMaterial = new THREE.SpriteMaterial({
 						map: particleTexture,
 						color: 0xffffff
@@ -255,7 +255,9 @@ window.addEventListener("load",begin);
 					particles.children[i].material.color.setHSL(currentColorRange[0], currentColorRange[1], (Math.random() * 0.5 + 0.2));
 				}
 				particles.position.y = 70;
-				scene.add(particles);
+				scene.add(particles);*/
+				
+				
 				clock = new THREE.Clock();
 				animate();
 			};
@@ -266,7 +268,7 @@ window.addEventListener("load",begin);
 				var elapsedSeconds = clock.getElapsedTime(),
 					particleRotationDirection = particleRotationDeg <= 180 ? -1 : 1;
 				
-				particles.rotation.y = elapsedSeconds * particleRotationSpeed * particleRotationDirection;
+				//particles.rotation.y = elapsedSeconds * particleRotationSpeed * particleRotationDirection;
 				
 				
 				requestAnimationFrame(animate);
