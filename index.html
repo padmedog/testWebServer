@@ -277,8 +277,10 @@ window.addEventListener("load",begin);
 				render(clock.getDelta());
 			};
 			function resize() {
-				var width = container.offsetWidth,
-					height = container.offsetHeight;
+				/*var width = container.offsetWidth,
+					height = container.offsetHeight;*/
+				var width = window.innerWidth,
+					height = window.innerHeight;
 				camera.aspect = width / height;
 				camera.updateProjectionMatrix();
 				
@@ -286,7 +288,7 @@ window.addEventListener("load",begin);
 				effect.setSize(width, height);
 			};
 			function update(dt) {
-				//resize();
+				resize();
 				camera.updateProjectionMatrix();
 				controls.update(dt);
 			};
