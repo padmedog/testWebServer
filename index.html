@@ -251,6 +251,8 @@ window.addEventListener("load",begin);
 					sprite.position.setLength(maxParticleSize * Math.random());
 					sprite.material.blending = THREE.AdditiveBlending;
 					particles.add(sprite);
+					
+					particles.children[i].material.color.setHSL(currentColorRange[0], currentColorRange[1], (Math.random() * 0.5 + 0.2));
 				}
 				particles.position.y = 70;
 				scene.add(particles);
@@ -266,14 +268,6 @@ window.addEventListener("load",begin);
 				
 				particles.rotation.y = elapsedSeconds * particleRotationSpeed * particleRotationDirection;
 				
-				if (lastColorRange[0] != currentColorRange[0] && lastColorRange[1] != currentColorRange[1])
-				{
-				  for (var i = 0; i < totalParticles; i++)
-				  {
-					particles.children[i].material.color.setHSL(currentColorRange[0], currentColorRange[1], (Math.random() * 0.5 + 0.2));
-				  }
-				  lastColorRange = currentColorRange;
-				}
 				
 				requestAnimationFrame(animate);
 				
