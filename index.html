@@ -291,6 +291,12 @@ window.addEventListener("load",begin);
 			function update(dt) {
 				resize();
 				camera.updateProjectionMatrix();
+				camera.position.x += 1;
+				controls.target.set(
+					camera.position.x + 0.15,
+					camera.position.y,
+					camera.position.z
+				);
 				controls.update(dt);
 			};
 			function render(dt){
