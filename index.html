@@ -32,7 +32,7 @@
 				lastColorRange = [0, 0.3],
 				currentColorRange = [0, 0.3];
 			var lastCamPos;
-			var lookSphere;
+			var lookObject;
 			
 			function init() {
 				scene = new THREE.Scene();
@@ -94,15 +94,15 @@
 				loadScene();
 				scene.add(holder);
 				
-				var sphereMaterial = new THREE.MeshPhongMaterial({
+				var lookObjectMaterial = new THREE.MeshPhongMaterial({
 					color: 0x00d0ff,
 					specular: 0xffffff,
 					shininess: 20,
 					shading: THREE.FlatShading
 				});
-				lookSphere = new THREE.Mesh( new THREE.SphereGeometry(1,64,48), sphereMaterial);
-				lookSphere.position.set(20,1,0);
-				scene.add(lookSphere);
+				lookObject = new THREE.Mesh( new THREE.CylinderGeometry(1,1.2,0.1,64,48), lookObjectMaterial);
+				lookObject.position.set(20,1,0);
+				scene.add(lookObject);
 				
 				window.addEventListener("resize", resize, false);
 				
@@ -136,7 +136,7 @@
 				lightScene.position.set(0, 5, 0);
 				holder.add(lightScene);
 				
-				THREE.ImageUtils.crossOrigin = '';
+				//THREE.ImageUtils.crossOrigin = '';
 				var floorTexture = THREE.ImageUtils.loadTexture("textures/wood.jpg");
 				floorTexture.wrapS = THREE.RepeatWrapping;
 				floorTexture.wrapT = THREE.RepeatWrapping;
@@ -191,8 +191,8 @@
 				var vector = camera.getWorldDirection();
 				var xResult = checkLineIntersection(0,0,1,0,0,camera.position.y,-vector.x,camera.position.y - vector.y),
 					zResult = checkLineIntersection(0,0,1,0,0,camera.position.y,-vector.z,camera.position.y - vector.y)
-				lookSphere.position.x = xResult.x;
-				lookSphere.position.z = zResult.x;
+				lookObject.position.x = xResult.x;
+				lookObject.position.z = zResult.x;
 				
 				controls.update(dt);
 				
@@ -203,8 +203,8 @@
 			}
 			function doClick()
 			{
-				holder.translateX(-lookSphere.position.x);
-				holder.translateZ(-lookSphere.position.z);
+				holder.translateX(-lookObject.position.x);
+				holder.translateZ(-lookObject.position.z);
 			}
 			
 			//http://jsfiddle.net/justin_c_rounds/Gd2S2/light/
