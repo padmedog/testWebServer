@@ -14,138 +14,16 @@
 				height: 100%;
 			}
 		</style>
+		<script src="scripts/three.min.js"></script>
+		<script src="scripts/StereoEffect.js"></script>
+		<script src="scripts/DeviceOrientationControls.js"></script>
+		<script src="scripts/OrbitControls.js"></script>
+		<script src="scripts/threex.keyboardstate.js"></script>
 	</head>
 	<body>
-		<script src="three.min.js"></script>
-		<script src="StereoEffect.js"></script>
-		<script src="DeviceOrientationControls.js"></script>
-		<script src="OrbitControls.js"></script>
 		<div id="webglviewer"></div>
-		<script>/*
-		
-var WIDTH = window.innerWidth;
-var HEIGHT = window.innerHeight;
-var renderer = new THREE.WebGLRenderer({antialias:true});
-var viewEffect;
-renderer.setSize(WIDTH, HEIGHT);
-renderer.setClearColor(0xDDDDDD, 1);
-document.body.appendChild(renderer.domElement);
-viewEffect = THREE.StereoEffect(renderer);
-var scene, camera, clock;
-clock = new THREE.Clock();
-
-var cube, cubeRotation;
-var Game = (function () {
-    function Game() {
-        this.light = new THREE.PointLight(0xFFFFFF);
-        this.light.position.set(-10, 15, 50);
-        scene.add(this.light);
-        var boxGeometry = new THREE.BoxGeometry(10, 10, 10);
-        var boxMaterial = new THREE.MeshPhongMaterial({ color: 0x0095DD });
-        this.visibleObject = new THREE.Mesh(boxGeometry, boxMaterial);
-        scene.add(this.visibleObject);
-		
-		
-		this.controls = new THREE.OrbitControls(camera, renderer.domElement);
-		this.controls.target.set(camera.position.x + 0.15, camera.position.y, camera.position.z);
-		this.controls.noPan = true;
-		this.controls.noZoom = true;
-		
-		/*this.particles = new THREE.Object3D();
-		this.totalParticles = 200;
-		this.maxParticleSize = 200;
-		this.particleRotationSpeed = 0;
-		this.praticleRotationDeg = 0;
-		this.lastColorRange = [0, 0.3];
-		this.currentColorRange = [0, 0.3];
-		
-		var particleTexture = THREE.ImageUtils.loadTexture("particle.png"),
-			spriteMaterial = new THREE.SpriteMaterial({
-				map: particleTexture,
-				color: 0xffffff
-			});
-		
-		for(var i = 0; i < this.totalParticles; i++)
-		{
-			var sprite = new THREE.Sprite(spriteMaterial);
-			sprite.scale.set(64, 64, 1.0);
-			sprite.position.set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.75);
-			sprite.position.setLength(this.maxParticleSize * Math.random());
-			sprite.material.blending = THREE.AdditiveBlending;
-			this.particles.add(sprite);
-		}
-		
-		this.particles.position.y = 70;
-		scene.add(this.particles);*//*
-		
-		window.addEventListener('deviceorientation',function(e){
-			if(!e.alpha){
-				return;
-			}
-			this.controls = new THREE.DeviceOrientationControls(camera, true);
-			this.controls.connect();
-			this.controls.update();
-			
-		});
-		//renderer.domElement.addEventListener('click', fullscreen, false);
-		
-        var step = function () {
-            //update game information and stuff here
-			
-            setTimeout(step, 16);
-        };
-        step();
-    }
-    Game.prototype.draw = function () {
-		//update draw-related things here
-		/*var elapsedSeconds = clock.getElapsedTime(),
-			particleRotationDirection = this.particleRotationDeg <= 180 ? -1 : 1;
-		this.particles.rotation.y = elapsedSeconds * this.particleRotationSpeed * particleRotationDirection;
-		if(this.lastColorRange[0] != this.currentColorRange[0] && this.lastColorRange[1] != this.currentColorRange[1])
-		{
-			for(var i = 0; i < this.totalParticles; i++)
-			{
-				this.particles.children[i].material.color.setHSL(this.currentColorRange[0], this.currentColorRange[1], (Math.random() * (0.5) + 0.2));
-			}
-			this.lastColorRange = currentColorRange;
-		}*//*
-    };
-    return Game;
-}());
-
-function begin()
-{
-	scene = new THREE.Scene();
-	camera = new THREE.PerspectiveCamera(70, WIDTH/HEIGHT);
-	camera.position.z = 50;
-	scene.add(camera);
-	var game;
-	function render() {
-		if(typeof game != "undefined")
-		{
-			game.draw();
-		}
-		requestAnimationFrame(render);
-		if(typeof viewEffect != "undefined")
-		{
-			viewEffect.render(scene, camera);
-		}
-		else
-		{
-			renderer.render(scene,camera);
-		}
-	}
-	render();
-	game = new Game();
-	
-}
-window.addEventListener("load",begin);
-
-
-*/
-		</script>
 		<script>
-			var scene, camera, renderer, element, container, effect, controls, clock;
+			var scene, camera, renderer, element, container, effect, controls, clock, holder, keyboard;
 			var particles = new THREE.Object3D(),
 				totalParticles = 200,
 				maxParticleSize = 200,
@@ -153,14 +31,17 @@ window.addEventListener("load",begin);
 				particleRotationDeg = 0,
 				lastColorRange = [0, 0.3],
 				currentColorRange = [0, 0.3];
+			var lastCamPos;
+			var lookSphere;
 			
 			function init() {
 				scene = new THREE.Scene();
 				camera = new THREE.PerspectiveCamera(90, window.innerwidth / window.innerHeight, 0.001, 700);
 				camera.position.set(0, 15, 0);
+				lastCamPos = camera.position;
 				scene.add(camera);
 				
-				renderer = new THREE.WebGLRenderer();
+				renderer = new THREE.WebGLRenderer({antialias:true});
 				element = renderer.domElement;
 				container = document.getElementById("webglviewer");
 				container.appendChild(element);
@@ -185,7 +66,7 @@ window.addEventListener("load",begin);
 					controls.connect();
 					controls.update();
 					
-					element.addEventListener("click",function(){
+					/*element.addEventListener("click",function(){
 						if (container.requestFullscreen)
 						{
 							container.requestFullscreen();
@@ -202,19 +83,58 @@ window.addEventListener("load",begin);
 						{
 							container.webkitRequestFullscreen();
 						}
-					},false);
+					},false);*/
+					element.addEventListener("click",doClick);
 					
 					window.removeEventListener("deviceorientation",setOrientationControls,true);
 				}
 				window.addEventListener("deviceorientation",setOrientationControls,true);
 				
+				holder = new THREE.Group();
+				loadScene();
+				scene.add(holder);
+				
+				var sphereMaterial = new THREE.MeshPhongMaterial({
+					color: 0x00d0ff,
+					specular: 0xffffff,
+					shininess: 20,
+					shading: THREE.FlatShading
+				});
+				lookSphere = new THREE.Mesh( new THREE.SphereGeometry(1,64,48), sphereMaterial);
+				lookSphere.position.set(20,1,0);
+				scene.add(lookSphere);
+				
+				window.addEventListener("resize", resize, false);
+				
+				clock = new THREE.Clock();
+				
+				//for non-mobile testing
+				keyboard = new THREEx.KeyboardState(renderer.domElement);
+				renderer.domElement.setAttribute("tabIndex","0");
+				renderer.domElement.focus();
+				keyboard.domElement.addEventListener("keydown",function(event){
+					if(event.repeat)
+					{
+						return;
+					}
+					if(keyboard.pressed("space"))
+					{
+						doClick();
+					}
+				});
+				
+				animate();
+			};
+			
+			function loadScene()
+			{
 				var light = new THREE.PointLight(0x999999, 2, 100);
 				light.position.set(50, 50, 50);
-				scene.add(light);
+				holder.add(light);
 				
 				var lightScene = new THREE.PointLight(0x999999, 2, 100);
 				lightScene.position.set(0, 5, 0);
-				scene.add(lightScene);
+				holder.add(lightScene);
 				
 				THREE.ImageUtils.crossOrigin = '';
 				var floorTexture = THREE.ImageUtils.loadTexture("textures/wood.jpg");
@@ -226,7 +146,7 @@ window.addEventListener("load",begin);
 				var floorMaterial = new THREE.MeshPhongMaterial({
 					color: 0xffffff,
 					specular: 0xffffff,
-					shininess: 20,
+					shininess: 1,
 					shading: THREE.FlatShading,
 					map: floorTexture
 				});
@@ -235,33 +155,8 @@ window.addEventListener("load",begin);
 				
 				var floor = new THREE.Mesh(geometry, floorMaterial);
 				floor.rotation.x = -Math.PI / 2;
-				scene.add(floor);
-				
-				/*var particleTexture = THREE.ImageUtils.loadTexture("textures/particle.png"),
-					spriteMaterial = new THREE.SpriteMaterial({
-						map: particleTexture,
-						color: 0xffffff
-					});
-				
-				for(var i = 0; i < totalParticles; i++)
-				{
-					var sprite = new THREE.Sprite(spriteMaterial);
-					
-					sprite.scale.set(64,64,1.0);
-					sprite.position.set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.75);
-					sprite.position.setLength(maxParticleSize * Math.random());
-					sprite.material.blending = THREE.AdditiveBlending;
-					particles.add(sprite);
-					
-					particles.children[i].material.color.setHSL(currentColorRange[0], currentColorRange[1], (Math.random() * 0.5 + 0.2));
-				}
-				particles.position.y = 70;
-				scene.add(particles);*/
-				
-				
-				clock = new THREE.Clock();
-				animate();
-			};
+				holder.add(floor);
+			}
 			
 			init();
 			
@@ -276,7 +171,7 @@ window.addEventListener("load",begin);
 				
 				update(clock.getDelta());
 				render(clock.getDelta());
-			};
+			}
 			function resize() {
 				/*var width = container.offsetWidth,
 					height = container.offsetHeight;*/
@@ -287,15 +182,70 @@ window.addEventListener("load",begin);
 				
 				renderer.setSize(width, height);
 				effect.setSize(width, height);
-			};
+			}
 			function update(dt) {
 				resize();
+				
 				camera.updateProjectionMatrix();
+				
+				var vector = camera.getWorldDirection();
+				var xResult = checkLineIntersection(0,0,1,0,0,camera.position.y,-vector.x,camera.position.y - vector.y),
+					zResult = checkLineIntersection(0,0,1,0,0,camera.position.y,-vector.z,camera.position.y - vector.y)
+				lookSphere.position.x = xResult.x;
+				lookSphere.position.z = zResult.x;
+				
 				controls.update(dt);
-			};
+				
+				lastCamPos = camera.position;
+			}
 			function render(dt){
 				effect.render(scene, camera);
-			};
+			}
+			function doClick()
+			{
+				holder.translateX(-lookSphere.position.x);
+				holder.translateZ(-lookSphere.position.z);
+			}
+			
+			//http://jsfiddle.net/justin_c_rounds/Gd2S2/light/
+			function checkLineIntersection(line1StartX, line1StartY, line1EndX, line1EndY, line2StartX, line2StartY, line2EndX, line2EndY) {
+				// if the lines intersect, the result contains the x and y of the intersection (treating the lines as infinite) and booleans for whether line segment 1 or line segment 2 contain the point
+				var denominator, a, b, numerator1, numerator2, result = {
+					x: null,
+					y: null,
+					onLine1: false,
+					onLine2: false
+				};
+				denominator = ((line2EndY - line2StartY) * (line1EndX - line1StartX)) - ((line2EndX - line2StartX) * (line1EndY - line1StartY));
+				if (denominator == 0) {
+					return result;
+				}
+				a = line1StartY - line2StartY;
+				b = line1StartX - line2StartX;
+				numerator1 = ((line2EndX - line2StartX) * a) - ((line2EndY - line2StartY) * b);
+				numerator2 = ((line1EndX - line1StartX) * a) - ((line1EndY - line1StartY) * b);
+				a = numerator1 / denominator;
+				b = numerator2 / denominator;
+
+				// if we cast these lines infinitely in both directions, they intersect here:
+				result.x = line1StartX + (a * (line1EndX - line1StartX));
+				result.y = line1StartY + (a * (line1EndY - line1StartY));
+			/*
+					// it is worth noting that this should be the same as:
+					x = line2StartX + (b * (line2EndX - line2StartX));
+					y = line2StartX + (b * (line2EndY - line2StartY));
+					*/
+				// if line1 is a segment and line2 is infinite, they intersect if:
+				if (a > 0 && a < 1) {
+					result.onLine1 = true;
+				}
+				// if line2 is a segment and line1 is infinite, they intersect if:
+				if (b > 0 && b < 1) {
+					result.onLine2 = true;
+				}
+				// if line1 and line2 are segments, they intersect if both of the above are true
+				return result;
+			}
 		</script>
 	</body>
 </html>
