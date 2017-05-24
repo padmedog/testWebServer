@@ -19,11 +19,14 @@
 		<script src="scripts/DeviceOrientationControls.js"></script>
 		<script src="scripts/OrbitControls.js"></script>
 		<script src="scripts/threex.keyboardstate.js"></script>
+		<script src="scripts/GameClient.js"></script>
 	</head>
 	<body>
+		<p id="result" style="display:none;">not connected</p>
 		<div id="webglviewer"></div>
 		<script>
 			var scene, camera, renderer, element, container, effect, controls, clock, holder, keyboard;
+			var objectsToMove = [];
 			var particles = new THREE.Object3D(),
 				totalParticles = 200,
 				maxParticleSize = 200,
@@ -93,6 +96,7 @@
 				holder = new THREE.Group();
 				loadScene();
 				scene.add(holder);
+				objectsToMove.push(holder);
 				
 				var lookObjectMaterial = new THREE.MeshPhongMaterial({
 					color: 0x00d0ff,
@@ -122,6 +126,9 @@
 						doClick();
 					}
 				});
+				
+				
+				GameClient.Connect("192.168.0.9:5524/game");
 				
 				animate();
 			};
@@ -203,8 +210,23 @@
 			}
 			function doClick()
 			{
-				holder.translateX(-lookObject.position.x);
-				holder.translateZ(-lookObject.position.z);
+				MoveCamera(lookObject.position.x, lookObject.position.z);
+			}
+			
+			function MoveCamera(x, z)
+			{
+				for(var i = 0; i < objectsToMove.length; i += 1)
+				{
+					objectsToMove[i].translateX(-x);
+					objectsToMove[i].translateZ(-z);
+				}
+				if(GameClient.Connected)
+				{
+					GameClient.SendPosition({
+						x: -x,
+						z: -z
+					});
+				}
 			}
 			
 			//http://jsfiddle.net/justin_c_rounds/Gd2S2/light/
