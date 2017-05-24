@@ -127,8 +127,14 @@
 					}
 				});
 				
-				
-				GameClient.Connect("192.168.0.9:5524/game");
+				try
+				{
+					GameClient.Connect("192.168.0.9:5524/game");
+				}
+				catch
+				{
+					console.log("failed to connect to server");
+				}
 				
 				animate();
 			};
