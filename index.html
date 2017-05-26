@@ -37,7 +37,6 @@
 			var lastCamPos;
 			var lookObject;
 			
-			//not currently used, but could be useful
 			var toFullscreen = function(){
 				if (container.requestFullscreen)
 				{
@@ -131,7 +130,7 @@
 				
 				try
 				{
-					if(!GameClient.Connect("146.115.72.191:5524/game"))
+					if(!GameClient.Connect("127.0.0.1:5524/game"))
 					//if(!GameClient.Connect("192.168.0.4:5524/game"))
 					{
 						//..
@@ -219,6 +218,7 @@
 			}
 			function doClick()
 			{
+				toFullScreen();
 				MoveCamera(lookObject.position.x, lookObject.position.z);
 			}
 			
