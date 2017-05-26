@@ -16,9 +16,9 @@ var GamePlayer = (function () {
             shininess: 5,
             shading: THREE.FlatShading
         });
-        this.pObj = new THREE.Mesh(new THREE.CylinderGeometry(4, 4, 12, 64, 48), material);
-		this.pObj.name = "player_" + this.id;
-		//this.name = this.pObj.name;
+        this.pObj = new THREE.Mesh(new THREE.CylinderGeometry(4, 4, 12, 256, 1), material);
+		this.pObj.position.y = 6
+		//this.pObj.name = "player_" + this.id;
     }
     return GamePlayer;
 }());
@@ -26,7 +26,14 @@ var GamePlayer = (function () {
 
 GameClient.Connect = function(address)
 {
-	GameClient.Socket = new WebSocket("ws://" + address);
+	try
+	{
+		GameClient.Socket = new WebSocket("ws://" + address);
+	}
+	catch(e)
+	{
+		return false;
+	}
 	GameClient.Socket.onopen = function(e) {
 		GameClient.Connected = true;
 		var elem = document.getElementById("result");
@@ -56,8 +63,8 @@ GameClient.Connect = function(address)
 				pl.pObj.position.x = parseInt(data[2]);
 				pl.pObj.position.z = parseInt(data[3]);
 				Players.push(pl);
-				objectsToMove.push(pl.pObj);
-				scene.add(pl.pObj);
+				//objectsToMove.push(pl.pObj);
+				holder.add(pl.pObj);
 				console.log("client " + pl.id + " connnected (ind " + GetPlayerIndById(pl.id) + ")");
 				break;
 			}
@@ -68,20 +75,20 @@ GameClient.Connect = function(address)
 				{
 					break;
 				}
-				scene.remove(Players[ind].pObj.name);
+				console.log("client " + Players[ind].id + " destroyed (ind " + ind + ", " + holder.children.indexOf(Players[ind].pObj) + ")");
+				holder.remove(Players[ind].pObj);
 				
-				console.log("client " + Players[ind].id + " destroyed (ind " + ind + ")");
-				
-				var i = objectsToMove.indexOf(Players[ind].pObj);
+				/*var i = objectsToMove.indexOf(Players[ind].pObj);
 				if(i >= 0)
 				{
 					objectsToMove.splice(i, 1);
 				}
-				Players.splice(ind, 1);
+				Players.splice(ind, 1);*/
 				break;
 			}
 		}
 	};
+	return true;
 };
 
 

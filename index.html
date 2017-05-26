@@ -25,7 +25,7 @@
 		<p id="result" style="display:none;">not connected</p>
 		<div id="webglviewer"></div>
 		<script>
-			var scene, camera, renderer, element, container, effect, controls, clock, holder, keyboard;
+			var scene, camera, renderer, element, container, effect, controls, clock, holder, keyboard, textureLoader;
 			var objectsToMove = [];
 			var particles = new THREE.Object3D(),
 				totalParticles = 200,
@@ -36,6 +36,26 @@
 				currentColorRange = [0, 0.3];
 			var lastCamPos;
 			var lookObject;
+			
+			//not currently used, but could be useful
+			var toFullscreen = function(){
+				if (container.requestFullscreen)
+				{
+					container.requestFullscreen();
+				}
+				else if (container.msRequestFullscreen)
+				{
+					container.msRequestFullscreen();
+				}
+				else if (container.mozRequestFullScreen)
+				{
+					container.mozRequestFullScreen();
+				}
+				else if (container.webkitRequestFullscreen)
+				{
+					container.webkitRequestFullscreen();
+				}
+			};
 			
 			function init() {
 				scene = new THREE.Scene();
@@ -69,24 +89,6 @@
 					controls.connect();
 					controls.update();
 					
-					/*element.addEventListener("click",function(){
-						if (container.requestFullscreen)
-						{
-							container.requestFullscreen();
-						}
-						else if (container.msRequestFullscreen)
-						{
-							container.msRequestFullscreen();
-						}
-						else if (container.mozRequestFullScreen)
-						{
-							container.mozRequestFullScreen();
-						}
-						else if (container.webkitRequestFullscreen)
-						{
-							container.webkitRequestFullscreen();
-						}
-					},false);*/
 					element.addEventListener("click",doClick);
 					
 					window.removeEventListener("deviceorientation",setOrientationControls,true);
@@ -129,7 +131,11 @@
 				
 				try
 				{
-					GameClient.Connect("192.168.0.9:5524/game");
+					if(!GameClient.Connect("146.115.72.191:5524/game"))
+					//if(!GameClient.Connect("192.168.0.4:5524/game"))
+					{
+						//..
+					}
 				}
 				catch(e)
 				{
@@ -141,6 +147,8 @@
 			
 			function loadScene()
 			{
+				textureLoader = new THREE.TextureLoader();
+				
 				var light = new THREE.PointLight(0x999999, 2, 100);
 				light.position.set(50, 50, 50);
 				holder.add(light);
@@ -149,26 +157,26 @@
 				lightScene.position.set(0, 5, 0);
 				holder.add(lightScene);
 				
-				//THREE.ImageUtils.crossOrigin = '';
-				var floorTexture = THREE.ImageUtils.loadTexture("textures/wood.jpg");
-				floorTexture.wrapS = THREE.RepeatWrapping;
-				floorTexture.wrapT = THREE.RepeatWrapping;
-				floorTexture.repeat = new THREE.Vector2(50,50);
-				floorTexture.anisotropy = renderer.getMaxAnisotropy();
+				var floorTexture = textureLoader.load("textures/wood.jpg", function(tex) {
+					tex.wrapS = THREE.RepeatWrapping;
+					tex.wrapT = THREE.RepeatWrapping;
+					tex.repeat = new THREE.Vector2(50,50);
+					tex.anisotropy = renderer.getMaxAnisotropy();
 				
-				var floorMaterial = new THREE.MeshPhongMaterial({
-					color: 0xffffff,
-					specular: 0xffffff,
-					shininess: 10,
-					shading: THREE.FlatShading,
-					map: floorTexture
+					var floorMaterial = new THREE.MeshPhongMaterial({
+						color: 0xffffff,
+						specular: 0xffffff,
+						shininess: 10,
+						shading: THREE.FlatShading,
+						map: tex
+					});
+				
+					var geometry = new THREE.PlaneBufferGeometry(1000,1000);
+					
+					var floor = new THREE.Mesh(geometry, floorMaterial);
+					floor.rotation.x = -Math.PI / 2;
+					holder.add(floor);
 				});
-				
-				var geometry = new THREE.PlaneBufferGeometry(1000,1000);
-				
-				var floor = new THREE.Mesh(geometry, floorMaterial);
-				floor.rotation.x = -Math.PI / 2;
-				holder.add(floor);
 			}
 			
 			init();
@@ -177,17 +185,12 @@
 				var elapsedSeconds = clock.getElapsedTime(),
 					particleRotationDirection = particleRotationDeg <= 180 ? -1 : 1;
 				
-				//particles.rotation.y = elapsedSeconds * particleRotationSpeed * particleRotationDirection;
-				
-				
 				requestAnimationFrame(animate);
 				
 				update(clock.getDelta());
 				render(clock.getDelta());
 			}
 			function resize() {
-				/*var width = container.offsetWidth,
-					height = container.offsetHeight;*/
 				var width = window.innerWidth,
 					height = window.innerHeight;
 				camera.aspect = width / height;
@@ -229,8 +232,8 @@
 				if(GameClient.Connected)
 				{
 					GameClient.SendPosition({
-						x: -x,
-						z: -z
+						x: -holder.position.x,
+						z: -holder.position.y
 					});
 				}
 			}
